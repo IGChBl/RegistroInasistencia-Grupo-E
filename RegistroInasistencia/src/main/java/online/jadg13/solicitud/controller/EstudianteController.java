@@ -7,11 +7,7 @@ import online.jadg13.solicitud.service.EstudianteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -24,8 +20,8 @@ public class EstudianteController {
     private CarreraService carreraService;
 
     @GetMapping
-    public Map<String, String> getAll() {
-        Map<String, String> json = new HashMap<>();
+    public Map<String, Object> getAll() {
+        Map<String, Object> json = new HashMap<>();
         try {
             var estudiantes = service.findAll();
             if (estudiantes.isEmpty()) {
@@ -34,12 +30,13 @@ public class EstudianteController {
             } else {
                 // Evitar el toString() directo de la entidad para mejor control del JSON
                 List<Map<String, Object>> estudianteData = estudiantes.stream()
+                        .sorted(Comparator.comparing(Estudiante::getCif))
                         .map(estudiante -> {
-                            Map<String, Object> data = new HashMap<>();
+                            Map<String, Object> data = new LinkedHashMap<>();
                             data.put("id", estudiante.getId());
+                            data.put("cif", estudiante.getCif());
                             data.put("nombre", estudiante.getNombre());
                             data.put("apellido", estudiante.getApellido());
-                            data.put("cif", estudiante.getCif());
                             data.put("email", estudiante.getEmail());
                             data.put("telefono", estudiante.getTelefono());
                             List<Long> carrerasIds = estudiante.getCarreras().stream()
@@ -50,7 +47,7 @@ public class EstudianteController {
                         })
                         .collect(Collectors.toList());
                 json.put("status", "success");
-                json.put("data", estudianteData.toString()); // Convertir la lista de mapas a String
+                json.put("data", estudianteData); // Convertir la lista de mapas a String
             }
         } catch (Exception e) {
             json.put("status", "error");
@@ -60,8 +57,8 @@ public class EstudianteController {
     }
 
     @PostMapping
-    public Map<String, String> store(@RequestBody Map<String, Object> request) {
-        Map<String, String> json = new HashMap<>();
+    public Map<String, Object> store(@RequestBody Map<String, Object> request) {
+        Map<String, Object> json = new HashMap<>();
         try {
             var estudiante = new Estudiante();
             estudiante.setNombre((String) request.get("nombre"));
@@ -83,10 +80,9 @@ public class EstudianteController {
             estudiante.setCarreras(carreras);
 
             var savedEstudiante = service.save(estudiante);
-            json.put("status", "success");
-            json.put("message", "Estudiante creado con éxito");
+
             // Evitar el toString() directo de la entidad para mejor control del JSON
-            Map<String, Object> estudianteData = new HashMap<>();
+            Map<String, Object> estudianteData = new LinkedHashMap<>();
             estudianteData.put("id", savedEstudiante.getId());
             estudianteData.put("nombre", savedEstudiante.getNombre());
             estudianteData.put("apellido", savedEstudiante.getApellido());
@@ -97,6 +93,9 @@ public class EstudianteController {
                     .map(Carrera::getId)
                     .collect(Collectors.toList());
             estudianteData.put("carreras", savedCarrerasIds);
+
+            json.put("status", "success");
+            json.put("message", "Estudiante creado con éxito");
             json.put("data", estudianteData.toString());
         } catch (Exception e) {
             json.put("status", "error");
@@ -113,7 +112,7 @@ public class EstudianteController {
             if (estudianteOptional.isPresent()) {
                 var estudiante = estudianteOptional.get();
                 // Evitar el toString() directo de la entidad para mejor control del JSON
-                Map<String, Object> estudianteData = new HashMap<>();
+                Map<String, Object> estudianteData = new LinkedHashMap<>();
                 estudianteData.put("id", estudiante.getId());
                 estudianteData.put("nombre", estudiante.getNombre());
                 estudianteData.put("apellido", estudiante.getApellido());
@@ -138,8 +137,8 @@ public class EstudianteController {
     }
 
     @PutMapping("/{id}")
-    public Map<String, String> update(@PathVariable("id") Long id, @RequestBody Map<String, Object> request) {
-        Map<String, String> json = new HashMap<>();
+    public Map<String, Object> update(@PathVariable("id") Long id, @RequestBody Map<String, Object> request) {
+        Map<String, Object> json = new HashMap<>();
         try {
             var existingEstudianteOptional = service.findById(id);
 
@@ -176,8 +175,7 @@ public class EstudianteController {
                 }
 
                 var updatedEstudiante = service.update(existingEstudiante);
-                json.put("status", "success");
-                json.put("message", "Estudiante actualizado con éxito");
+
                 // Evitar el toString() directo de la entidad para mejor control del JSON
                 Map<String, Object> estudianteData = new HashMap<>();
                 estudianteData.put("id", updatedEstudiante.getId());
@@ -190,6 +188,9 @@ public class EstudianteController {
                         .map(Carrera::getId)
                         .collect(Collectors.toList());
                 estudianteData.put("carreras", updatedCarrerasIds);
+
+                json.put("status", "success");
+                json.put("message", "Estudiante actualizado con éxito");
                 json.put("data", estudianteData.toString());
             } else {
                 json.put("status", "error");
