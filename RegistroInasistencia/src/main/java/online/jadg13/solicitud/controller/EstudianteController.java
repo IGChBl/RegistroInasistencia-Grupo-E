@@ -28,11 +28,10 @@ public class EstudianteController {
                 json.put("status", "success");
                 json.put("message", "No hay estudiantes registrados");
             } else {
-                // Evitar el toString() directo de la entidad para mejor control del JSON
                 List<Map<String, Object>> estudianteData = estudiantes.stream()
                         .sorted(Comparator.comparing(Estudiante::getCif))
                         .map(estudiante -> {
-                            Map<String, Object> data = new LinkedHashMap<>();
+                            Map<String, Object> data = new LinkedHashMap<>(); //se reemplazó HashMap con LinkedHashMap para asegurar el orden de los campos
                             data.put("id", estudiante.getId());
                             data.put("cif", estudiante.getCif());
                             data.put("nombre", estudiante.getNombre());
@@ -81,8 +80,7 @@ public class EstudianteController {
 
             var savedEstudiante = service.save(estudiante);
 
-            // Evitar el toString() directo de la entidad para mejor control del JSON
-            Map<String, Object> estudianteData = new LinkedHashMap<>();
+            Map<String, Object> estudianteData = new LinkedHashMap<>(); //se reemplazó HashMap con LinkedHashMap para asegurar el orden de los campos
             estudianteData.put("id", savedEstudiante.getId());
             estudianteData.put("nombre", savedEstudiante.getNombre());
             estudianteData.put("apellido", savedEstudiante.getApellido());
@@ -111,8 +109,8 @@ public class EstudianteController {
             var estudianteOptional = service.findById(id);
             if (estudianteOptional.isPresent()) {
                 var estudiante = estudianteOptional.get();
-                // Evitar el toString() directo de la entidad para mejor control del JSON
-                Map<String, Object> estudianteData = new LinkedHashMap<>();
+
+                Map<String, Object> estudianteData = new LinkedHashMap<>(); //se reemplazó HashMap con LinkedHashMap para asegurar el orden de los campos
                 estudianteData.put("id", estudiante.getId());
                 estudianteData.put("nombre", estudiante.getNombre());
                 estudianteData.put("apellido", estudiante.getApellido());
@@ -176,8 +174,7 @@ public class EstudianteController {
 
                 var updatedEstudiante = service.update(existingEstudiante);
 
-                // Evitar el toString() directo de la entidad para mejor control del JSON
-                Map<String, Object> estudianteData = new HashMap<>();
+                Map<String, Object> estudianteData = new LinkedHashMap<>(); //se reemplazó HashMap con LinkedHashMap para asegurar el orden de los campos
                 estudianteData.put("id", updatedEstudiante.getId());
                 estudianteData.put("nombre", updatedEstudiante.getNombre());
                 estudianteData.put("apellido", updatedEstudiante.getApellido());
