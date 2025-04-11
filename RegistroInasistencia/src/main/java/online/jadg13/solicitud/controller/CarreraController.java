@@ -28,6 +28,7 @@ public class CarreraController {
             } else {
                 json.put("status", "success");
                 json.put("data", carreras.toString());
+                json.put("cantidad de carreras", String.valueOf(carreras.size()));
             }
         }catch (Exception e){
             json.put("status", "error" + e.toString());

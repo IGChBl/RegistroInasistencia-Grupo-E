@@ -34,5 +34,7 @@ public class CarreraService {
         repository.deleteById(id);
     }
 
-
+    public long contarCarrera() {
+        return repository.count();
+    }
 }
