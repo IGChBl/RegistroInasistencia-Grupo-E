@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function Login() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const navigate = useNavigate();
 
     const handleUsernameChange = (event) => {
         setUsername(event.target.value);
@@ -18,20 +20,20 @@ function Login() {
         setError('');
 
         try {
-            const response = await fetch('/login', { // <---- URL corregida a '/login'
+            const response = await fetch('/login', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded', // Spring Security por defecto espera este tipo
+                    'Content-Type': 'application/x-www-form-urlencoded',
                 },
                 body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`,
             });
 
             if (response.ok) {
-                // Login exitoso, aquí deberías manejar la sesión/token y redirigir al usuario
                 console.log('Login successful!');
-                // Por ahora, solo mostraremos un mensaje. Luego implementaremos la redirección basada en el rol.
+                // **Después del login exitoso, recargamos para que el navegador siga la redirección del backend**
+                window.location.reload();
             } else {
-                const errorData = await response.text(); // O response.json() si tu backend envía JSON en caso de error
+                const errorData = await response.text();
                 setError(`Login failed: ${errorData}`);
             }
         } catch (error) {

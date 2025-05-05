@@ -1,29 +1,35 @@
 import React from 'react';
-import './App.css';
-// import EstudianteGestion from './components/EstudianteGestion';
-// import CoordinadorGestion from './components/CoordinadorGestion';
-// import CarreraGestion from './components/CarreraGestion';
-// import JustificacionGestion from "./components/JustificacionGestion";
-import Login from './components/Login'; // Importa el componente Login
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Login from './components/Login';
+import EstudiantesPage from './pages/EstudiantesPage';
+import CoordinadoresPage from './pages/CoordinadoresPage';
+import InicioPage from './pages/InicioPage';
+
+// Función para verificar si el usuario está autenticado (por ahora, siempre falso)
+const isAuthenticated = () => {
+
+    return false;
+};
+
+// Componente para proteger rutas
+const PrivateRoute = ({ children }) => {
+    return isAuthenticated() ? children : <Navigate to="/login" />;
+};
 
 function App() {
     return (
-        <div className="App">
-            <header className="App-header">
-                <h1>Registro de Inasistencias</h1>
-                <p>Aquí podrás gestionar las inasistencias de los estudiantes y coordinadores.</p>
-            </header>
-            <main className="App-main">
-                <Login /> {/* Renderiza el formulario de login */}
-                {/* <EstudianteGestion /> */}
-                {/* <CoordinadorGestion /> */}
-                {/* <CarreraGestion /> */}
-                {/* <JustificacionGestion /> */}
-            </main>
-            <footer className="App-footer">
-                <p>&copy; 2025 Registro de Inasistencias</p>
-            </footer>
-        </div>
+        <BrowserRouter>
+            <Routes>
+                <Route path="/login" element={<Login />} />
+                {/* Rutas protegidas */}
+                <Route path="/estudiantes" element={<PrivateRoute><EstudiantesPage /></PrivateRoute>} />
+                <Route path="/coordinadores" element={<PrivateRoute><CoordinadoresPage /></PrivateRoute>} />
+                {/* Ruta de inicio (puede o no requerir autenticación) */}
+                <Route path="/inicio" element={<InicioPage />} />
+                {/* Ruta por defecto si no coincide ninguna */}
+                <Route path="/" element={<Navigate to="/login" />} />
+            </Routes>
+        </BrowserRouter>
     );
 }
 

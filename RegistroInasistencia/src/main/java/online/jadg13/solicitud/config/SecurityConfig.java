@@ -49,9 +49,9 @@ public class SecurityConfig {
 
         return (request, response, authentication) -> {
             Set<String> roles = AuthorityUtils.authorityListToSet(authentication.getAuthorities());
-            if (roles.contains("ESTUDIANTE")) {
+            if (roles.contains("ROLE_ESTUDIANTE")) { // Asegúrate de usar el prefijo ROLE_
                 handler.setTargetUrlParameter("/api/estudiantes");
-            } else if (roles.contains("COORDINADOR")) {
+            } else if (roles.contains("ROLE_COORDINADOR")) { // Asegúrate de usar el prefijo ROLE_
                 handler.setTargetUrlParameter("/api/coordinadores");
             } else {
                 handler.setTargetUrlParameter("/inicio");
