@@ -67,17 +67,17 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/estudiantes/**").hasRole("ESTUDIANTE") // Rutas para estudiantes con /api
-                        .requestMatchers("/api/coordinadores/**").hasRole("COORDINADOR") // Rutas para coordinadores con /api
+                        .requestMatchers("/api/estudiantes/**").hasRole("ESTUDIANTE")
+                        .requestMatchers("/api/coordinadores/**").hasRole("COORDINADOR")
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
                 .formLogin(form -> form
-                                .loginProcessingUrl("/login")
-                                .successHandler(successHandler()) // Usa nuestro AuthenticationSuccessHandler
-                                .failureUrl("/login?error=true")
-                                .permitAll()
-                        // .defaultSuccessUrl("/inicio") // <--- ¡Esta línea NO debería estar aquí!
+                        .loginProcessingUrl("/login")
+                        .successHandler(successHandler())
+                        .failureUrl("/login?error=true")
+                        .permitAll()
+                        .defaultSuccessUrl("/", false) // Desactivamos la redirección por defecto
                 )
                 .logout(logout -> logout.permitAll());
 
