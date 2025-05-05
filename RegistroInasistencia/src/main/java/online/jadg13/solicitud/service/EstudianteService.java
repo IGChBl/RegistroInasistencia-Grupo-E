@@ -1,12 +1,12 @@
 package online.jadg13.solicitud.service;
 
+import online.jadg13.solicitud.entity.Estudiante;
 import online.jadg13.solicitud.repository.EstudianteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import online.jadg13.solicitud.entity.Estudiante;
+
 import java.util.List;
 import java.util.Optional;
-
 
 @Service
 public class EstudianteService {
@@ -33,5 +33,4 @@ public class EstudianteService {
     public void delete(Long id) {
         repository.deleteById(id);
     }
-
 }

@@ -4,11 +4,15 @@ import jakarta.validation.Valid;
 import online.jadg13.solicitud.entity.Carrera;
 import online.jadg13.solicitud.service.CarreraService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/carrera")
@@ -18,27 +22,30 @@ public class CarreraController {
     private CarreraService service;
 
     @GetMapping
-    public Map<String, String> listar() {
-        Map<String, String> json = new HashMap<>();
-        try{
+    public ResponseEntity<Map<String, Object>> listar() {
+        Map<String, Object> json = new HashMap<>();
+        try {
             List<Carrera> carreras = service.findAll();
             if (carreras.isEmpty()) {
                 json.put("status", "success");
                 json.put("message", "No hay carreras registradas");
+                return new ResponseEntity<>(json, HttpStatus.OK);
             } else {
                 json.put("status", "success");
-                json.put("data", carreras.toString());
-                json.put("cantidad de carreras", String.valueOf(carreras.size()));
+                json.put("data", carreras.stream().map(Carrera::toString).collect(Collectors.toList()));
+                json.put("cantidad de carreras", carreras.size());
+                return new ResponseEntity<>(json, HttpStatus.OK);
             }
-        }catch (Exception e){
-            json.put("status", "error" + e.toString());
+        } catch (Exception e) {
+            json.put("status", "error");
+            json.put("message", e.toString());
+            return new ResponseEntity<>(json, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return json;
     }
 
     @PostMapping
-    public Map<String, String> store(@RequestBody Map<String, String> request) {
-        Map<String, String> json = new HashMap<>();
+    public ResponseEntity<Map<String, Object>> store(@RequestBody Map<String, String> request) {
+        Map<String, Object> json = new HashMap<>();
         try {
             Carrera carrera = new Carrera();
             carrera.setNombre(request.get("nombre"));
@@ -48,73 +55,80 @@ public class CarreraController {
             json.put("status", "success");
             json.put("message", "Carrera creada con éxito");
             json.put("data", savedCarrera.toString());
+            return new ResponseEntity<>(json, HttpStatus.CREATED);
         } catch (Exception e) {
-            json.put("status", "error" + e.toString());
+            json.put("status", "error");
+            json.put("message", e.toString());
+            return new ResponseEntity<>(json, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return json;
-
     }
 
     @GetMapping("/{id}")
-    public Map<String, String> show(@PathVariable("id") Long id) {
-        Map<String, String> json = new HashMap<>();
+    public ResponseEntity<Map<String, Object>> show(@PathVariable Long id) {
+        Map<String, Object> json = new HashMap<>();
         try {
-            Carrera carrera = service.findById(id);
-            if (carrera != null) {
+            Optional<Carrera> carreraOptional = service.findById(id);
+            if (carreraOptional.isPresent()) {
                 json.put("status", "success");
-                json.put("data", carrera.toString());
+                json.put("data", carreraOptional.get().toString());
+                return new ResponseEntity<>(json, HttpStatus.OK);
             } else {
                 json.put("status", "error");
-                json.put("message", "Carrera no encontrada");
+                json.put("message", "Carrera no encontrada con id: " + id);
+                return new ResponseEntity<>(json, HttpStatus.NOT_FOUND);
             }
         } catch (Exception e) {
-            json.put("status", "error" + e.toString());
+            json.put("status", "error");
+            json.put("message", e.toString());
+            return new ResponseEntity<>(json, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return json;
     }
 
     @PutMapping("/{id}")
-    public Map<String, String> update(@PathVariable("id") Long id, @Valid @RequestBody Carrera carrera) {
-        Map<String, String> json = new HashMap<>();
+    public ResponseEntity<Map<String, Object>> update(@PathVariable("id") Long id, @Valid @RequestBody Carrera carrera) {
+        Map<String, Object> json = new HashMap<>();
         try {
-            Carrera existingCarrera = service.findById(id);
-            if (existingCarrera != null) {
+            Optional<Carrera> existingCarreraOptional = service.findById(id);
+            if (existingCarreraOptional.isPresent()) {
+                Carrera existingCarrera = existingCarreraOptional.get();
                 existingCarrera.setNombre(carrera.getNombre());
                 existingCarrera.setDescripcion(carrera.getDescripcion());
                 Carrera updatedCarrera = service.update(existingCarrera);
                 json.put("status", "success");
                 json.put("message", "Carrera actualizada con éxito");
                 json.put("data", updatedCarrera.toString());
+                return new ResponseEntity<>(json, HttpStatus.OK);
             } else {
                 json.put("status", "error");
                 json.put("message", "Carrera no encontrada");
+                return new ResponseEntity<>(json, HttpStatus.NOT_FOUND);
             }
         } catch (Exception e) {
-            json.put("status", "error" + e.toString());
+            json.put("status", "error");
+            json.put("message", e.toString());
+            return new ResponseEntity<>(json, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return json;
     }
 
     @DeleteMapping("/{id}")
-    public Map<String, String> delete(@PathVariable("id") Long id) {
-        Map<String, String> json = new HashMap<>();
+    public ResponseEntity<Map<String, Object>> delete(@PathVariable("id") Long id) {
+        Map<String, Object> json = new HashMap<>();
         try {
-            Carrera carrera = service.findById(id);
-            if (carrera != null) {
+            Optional<Carrera> carreraOptional = service.findById(id);
+            if (carreraOptional.isPresent()) {
                 service.delete(id);
                 json.put("status", "success");
                 json.put("message", "Carrera eliminada con éxito");
+                return new ResponseEntity<>(json, HttpStatus.OK);
             } else {
                 json.put("status", "error");
                 json.put("message", "Carrera no encontrada");
+                return new ResponseEntity<>(json, HttpStatus.NOT_FOUND);
             }
         } catch (Exception e) {
-            json.put("status", "error" + e.toString());
+            json.put("status", "error");
+            json.put("message", e.toString());
+            return new ResponseEntity<>(json, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return json;
     }
-
-
-
-
 }

@@ -1,7 +1,8 @@
 package online.jadg13.solicitud.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
+        import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -42,11 +43,7 @@ public class Justificacion {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "estudiante_id", nullable = false)
     @ToString.Exclude
+    @JsonBackReference // Para manejar la relación bidireccional con Estudiante
     private Estudiante estudiante;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "carrera_id", nullable = false)
-    @ToString.Exclude
-    private Carrera carrera;
 
 }

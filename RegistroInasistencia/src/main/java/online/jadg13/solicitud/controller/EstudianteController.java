@@ -31,7 +31,7 @@ public class EstudianteController {
                 List<Map<String, Object>> estudianteData = estudiantes.stream()
                         .sorted(Comparator.comparing(Estudiante::getCif))
                         .map(estudiante -> {
-                            Map<String, Object> data = new LinkedHashMap<>(); //se reemplazó HashMap con LinkedHashMap para asegurar el orden de los campos
+                            Map<String, Object> data = new LinkedHashMap<>();
                             data.put("id", estudiante.getId());
                             data.put("cif", estudiante.getCif());
                             data.put("nombre", estudiante.getNombre());
@@ -46,7 +46,7 @@ public class EstudianteController {
                         })
                         .collect(Collectors.toList());
                 json.put("status", "success");
-                json.put("data", estudianteData); // Convertir la lista de mapas a String
+                json.put("data", estudianteData);
             }
         } catch (Exception e) {
             json.put("status", "error");
@@ -70,17 +70,15 @@ public class EstudianteController {
             Set<Carrera> carreras = new HashSet<>();
             if (carrerasIds != null) {
                 for (Integer carreraId : carrerasIds) {
-                    Carrera carrera = carreraService.findById(Long.valueOf(carreraId));
-                    if (carrera != null) {
-                        carreras.add(carrera);
-                    }
+                    Optional<Carrera> carreraOptional = carreraService.findById(Long.valueOf(carreraId));
+                    carreraOptional.ifPresent(carreras::add);
                 }
             }
             estudiante.setCarreras(carreras);
 
             var savedEstudiante = service.save(estudiante);
 
-            Map<String, Object> estudianteData = new LinkedHashMap<>(); //se reemplazó HashMap con LinkedHashMap para asegurar el orden de los campos
+            Map<String, Object> estudianteData = new LinkedHashMap<>();
             estudianteData.put("id", savedEstudiante.getId());
             estudianteData.put("nombre", savedEstudiante.getNombre());
             estudianteData.put("apellido", savedEstudiante.getApellido());
@@ -94,7 +92,7 @@ public class EstudianteController {
 
             json.put("status", "success");
             json.put("message", "Estudiante creado con éxito");
-            json.put("data", estudianteData.toString());
+            json.put("data", estudianteData);
         } catch (Exception e) {
             json.put("status", "error");
             json.put("message", e.toString());
@@ -103,14 +101,14 @@ public class EstudianteController {
     }
 
     @GetMapping("/{id}")
-    public Map<String, String> show(@PathVariable("id") Long id) {
-        Map<String, String> json = new HashMap<>();
+    public Map<String, Object> show(@PathVariable("id") Long id) {
+        Map<String, Object> json = new HashMap<>();
         try {
             var estudianteOptional = service.findById(id);
             if (estudianteOptional.isPresent()) {
                 var estudiante = estudianteOptional.get();
 
-                Map<String, Object> estudianteData = new LinkedHashMap<>(); //se reemplazó HashMap con LinkedHashMap para asegurar el orden de los campos
+                Map<String, Object> estudianteData = new LinkedHashMap<>();
                 estudianteData.put("id", estudiante.getId());
                 estudianteData.put("nombre", estudiante.getNombre());
                 estudianteData.put("apellido", estudiante.getApellido());
@@ -122,7 +120,7 @@ public class EstudianteController {
                         .collect(Collectors.toList());
                 estudianteData.put("carreras", carrerasIds);
                 json.put("status", "success");
-                json.put("data", estudianteData.toString());
+                json.put("data", estudianteData);
             } else {
                 json.put("status", "error");
                 json.put("message", "Estudiante no encontrado");
@@ -163,10 +161,8 @@ public class EstudianteController {
                     Set<Carrera> carreras = new HashSet<>();
                     if (carrerasIds != null) {
                         for (Integer carreraId : carrerasIds) {
-                            Carrera carrera = carreraService.findById(Long.valueOf(carreraId));
-                            if (carrera != null) {
-                                carreras.add(carrera);
-                            }
+                            Optional<Carrera> carreraOptional = carreraService.findById(Long.valueOf(carreraId));
+                            carreraOptional.ifPresent(carreras::add);
                         }
                     }
                     existingEstudiante.setCarreras(carreras);
@@ -174,7 +170,7 @@ public class EstudianteController {
 
                 var updatedEstudiante = service.update(existingEstudiante);
 
-                Map<String, Object> estudianteData = new LinkedHashMap<>(); //se reemplazó HashMap con LinkedHashMap para asegurar el orden de los campos
+                Map<String, Object> estudianteData = new LinkedHashMap<>();
                 estudianteData.put("id", updatedEstudiante.getId());
                 estudianteData.put("nombre", updatedEstudiante.getNombre());
                 estudianteData.put("apellido", updatedEstudiante.getApellido());
@@ -188,7 +184,7 @@ public class EstudianteController {
 
                 json.put("status", "success");
                 json.put("message", "Estudiante actualizado con éxito");
-                json.put("data", estudianteData.toString());
+                json.put("data", estudianteData);
             } else {
                 json.put("status", "error");
                 json.put("message", "Estudiante no encontrado");

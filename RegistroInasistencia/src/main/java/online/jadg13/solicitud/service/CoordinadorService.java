@@ -5,7 +5,6 @@ import online.jadg13.solicitud.repository.CoordinadorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,8 +22,8 @@ public class CoordinadorService {
         return repository.findAll();
     }
 
-    public Coordinador findById(Long id) {
-        return repository.findById(id).get();
+    public Optional<Coordinador> findById(Long id) {
+        return repository.findById(id);
     }
 
     public Coordinador update(Coordinador coordinador) {
@@ -34,8 +33,4 @@ public class CoordinadorService {
     public void delete(Long id) {
         repository.deleteById(id);
     }
-
-
-
-
 }
