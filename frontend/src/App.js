@@ -18,7 +18,7 @@ function App() {
           <CarreraGestion /> {/* Utiliza el componente de gestión de carreras */}
           <JustificacionGestion /> {/* Utiliza el componente de gestión de justificación */}
         </main>
-        
+
         <footer className="App-footer">
           <p>&copy; 2025 Registro de Inasistencias</p>
         </footer>
