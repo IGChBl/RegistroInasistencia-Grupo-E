@@ -7,9 +7,19 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
 @Configuration
 @EnableWebSecurity
@@ -32,22 +42,56 @@ public class SecurityConfig {
     }
 
     @Bean
+    public AuthenticationSuccessHandler successHandler() {
+        SimpleUrlAuthenticationSuccessHandler handler = new SimpleUrlAuthenticationSuccessHandler();
+        // handler.setUseReferer(true); // <-- Comenta o elimina esta línea
+        handler.setDefaultTargetUrl("/inicio"); // Fallback
+
+        return (request, response, authentication) -> {
+            Set<String> roles = AuthorityUtils.authorityListToSet(authentication.getAuthorities());
+            if (roles.contains("ESTUDIANTE")) {
+                handler.setTargetUrlParameter("/api/estudiantes");
+            } else if (roles.contains("COORDINADOR")) {
+                handler.setTargetUrlParameter("/api/coordinadores");
+            } else {
+                handler.setTargetUrlParameter("/inicio");
+            }
+            handler.onAuthenticationSuccess(request, response, authentication);
+        };
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // Deshabilitar CSRF por ahora (para facilitar las pruebas con el frontend)
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll() // Permitir acceso sin autenticación a las rutas de autenticación (login)
-                        .requestMatchers("/api/estudiante/**").hasRole("ESTUDIANTE") // Ejemplo: solo estudiantes pueden acceder a /api/estudiante/**
-                        .requestMatchers("/api/coordinador/**").hasRole("COORDINADOR") // Ejemplo: solo coordinadores pueden acceder a /api/coordinador/**
-                        .anyRequest().authenticated() // Cualquier otra petición requiere autenticación
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/estudiantes/**").hasRole("ESTUDIANTE") // Rutas para estudiantes con /api
+                        .requestMatchers("/api/coordinadores/**").hasRole("COORDINADOR") // Rutas para coordinadores con /api
+                        .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
                 .formLogin(form -> form
-                        .loginProcessingUrl("/api/auth/login") // URL donde se enviarán las credenciales
+                        .loginProcessingUrl("/login")
+                        .successHandler(successHandler()) // Usa nuestro AuthenticationSuccessHandler
+                        .failureUrl("/login?error=true")
                         .permitAll()
                 )
                 .logout(logout -> logout.permitAll());
 
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:3001"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("Content-Type", "Authorization"));
+        configuration.setAllowCredentials(true);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }
