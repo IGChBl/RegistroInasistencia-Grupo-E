@@ -73,10 +73,11 @@ public class SecurityConfig {
                 )
                 .authenticationProvider(authenticationProvider())
                 .formLogin(form -> form
-                        .loginProcessingUrl("/login")
-                        .successHandler(successHandler()) // Usa nuestro AuthenticationSuccessHandler
-                        .failureUrl("/login?error=true")
-                        .permitAll()
+                                .loginProcessingUrl("/login")
+                                .successHandler(successHandler()) // Usa nuestro AuthenticationSuccessHandler
+                                .failureUrl("/login?error=true")
+                                .permitAll()
+                        // .defaultSuccessUrl("/inicio") // <--- ¡Esta línea NO debería estar aquí!
                 )
                 .logout(logout -> logout.permitAll());
 
